@@ -1,5 +1,6 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { useState, useRef, useEffect } from 'react'
 import { Menu, Bell, ChevronDown, User, LogOut } from 'lucide-react'
 import Link from 'next/link'
@@ -10,6 +11,7 @@ interface Props {
 
 export default function Header({ toggleSidebar }: Props) {
 
+  const router = useRouter();
   const [open, setOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
@@ -109,10 +111,11 @@ export default function Header({ toggleSidebar }: Props) {
 
               <button
                 className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 w-full text-left text-red-500"
-              >
+                onClick={() => router.push('/login')}>
                 <LogOut size={16} />
                 Logout
               </button>
+              
 
             </div>
 
