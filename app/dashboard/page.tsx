@@ -4,15 +4,15 @@ import TicketTable from '@/components/TicketTable'
 export default function DashboardPage() {
 
   return (
-    <div>
+    <div className="p-4 sm:p-6">
 
-      <h1 className="text-3xl font-bold mb-6">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6">
         Welcome, KOFI EDEM
       </h1>
 
       {/* Stats Cards */}
 
-      <div className="grid grid-cols-3 gap-6 mb-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-10">
 
         <DashboardCard
           title="Total Tickets"
@@ -33,7 +33,9 @@ export default function DashboardPage() {
 
       {/* Ticket Table */}
 
-      <TicketTable />
+      <div className="overflow-x-auto">
+        <TicketTable />
+      </div>
 
     </div>
   )

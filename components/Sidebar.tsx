@@ -45,7 +45,7 @@ export default function Sidebar({ isOpen }: Props) {
   return (
     <div
       className={`bg-orange-400 text-white transition-all duration-300
-      ${isOpen ? "w-64" : "w-20"} h-screen p-4`}
+      ${isOpen ? "w-64" : "w-20"} h-screen overflow-y-auto p-4`}
     >
 
       {/* Logo */}

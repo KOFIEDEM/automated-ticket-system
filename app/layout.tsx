@@ -12,7 +12,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html className={cn("font-sans", geist.variable)}>
+    <html className={cn("font-sans overflow-x-hidden", geist.variable)}>
       <body>
         <TicketProvider>
           {children}

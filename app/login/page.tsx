@@ -12,12 +12,11 @@ export default function LoginPage() {
   const router = useRouter()
 
   const handleLogin = async (e:any) => {
-
     e.preventDefault()
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: email,
-      password: password
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password
     })
 
     if(error){
@@ -25,30 +24,34 @@ export default function LoginPage() {
     } else {
       router.push("/dashboard")
     }
-
   }
 
   return (
 
-    <div className="min-h-screen flex items-center justify-center bg-contain"
-    style={{ backgroundImage: "url('/train-station.jpg')" }}>
+    <div
+      className="min-h-screen flex items-center justify-center px-4 py-6 bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: "url('/train-station.jpg')" }}
+    >
 
-      <div className="bg-orange-50 p-8 rounded-2xl shadow-lg w-[400px]">
+      <div className="bg-orange-50 w-full max-w-md p-5 sm:p-6 md:p-8 rounded-2xl shadow-lg">
 
-        <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center mb-6 mx-auto">
-          <User size={50} className='text-orange-400'/>
+        {/* Avatar */}
+        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white flex items-center justify-center mb-5 sm:mb-6 mx-auto">
+          <User size={40} className='text-orange-400'/>
         </div>
 
-        <h1 className="text-2xl font-bold text-center mb-6">
+        {/* Title */}
+        <h1 className="text-xl sm:text-2xl font-bold text-center mb-5 sm:mb-6">
           Login to RailPass
         </h1>
 
-        <form className="space-y-4" onSubmit={handleLogin}>
+        {/* Form */}
+        <form className="space-y-3 sm:space-y-4" onSubmit={handleLogin}>
 
           <input
             type="email"
             placeholder="Email"
-            className="w-full border p-3 rounded-lg"
+            className="w-full border p-2.5 sm:p-3 rounded-lg text-sm sm:text-base"
             value={email}
             onChange={(e)=>setEmail(e.target.value)}
           />
@@ -56,12 +59,12 @@ export default function LoginPage() {
           <input
             type="password"
             placeholder="Password"
-            className="w-full border p-3 rounded-lg"
+            className="w-full border p-2.5 sm:p-3 rounded-lg text-sm sm:text-base"
             value={password}
             onChange={(e)=>setPassword(e.target.value)}
           />
 
-          <button className="w-full bg-orange-400 text-white p-3 rounded-lg hover:bg-orange-300 transition">
+          <button className="w-full bg-orange-400 text-white p-2.5 sm:p-3 rounded-lg hover:bg-orange-300 transition text-sm sm:text-base">
             Login
           </button>
 

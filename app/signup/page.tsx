@@ -14,12 +14,11 @@ export default function SignupPage() {
   const router = useRouter()
 
   const handleSignup = async (e: any) => {
-
     e.preventDefault()
 
-    const { data, error } = await supabase.auth.signUp({
-      email: email,
-      password: password,
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
       options: {
         data: {
           full_name: name,
@@ -33,30 +32,34 @@ export default function SignupPage() {
     } else {
       router.push("/login")
     }
-
   }
 
   return (
 
-    <div className="min-h-screen flex items-center justify-center bg-contain"
-    style={{ backgroundImage: "url('/train-station.jpg')" }}>
+    <div
+      className="min-h-screen flex items-center justify-center px-4 py-6 bg-cover bg-center bg-no-repeat"
+      style={{ backgroundImage: "url('/train-station.jpg')" }}
+    >
 
-      <div className="bg-orange-50 p-8 rounded-2xl shadow-lg w-[400px]">
+      <div className="bg-orange-50 w-full max-w-md p-5 sm:p-6 md:p-8 rounded-2xl shadow-lg">
 
-        <div className="w-20 h-20 rounded-full bg-white flex items-center justify-center mb-6 mx-auto">
-          <User size={50} className='text-orange-400'/>
+        {/* Avatar */}
+        <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white flex items-center justify-center mb-5 sm:mb-6 mx-auto">
+          <User size={40} className='text-orange-400'/>
         </div>
 
-        <h1 className="text-2xl font-bold text-center mb-6">
+        {/* Title */}
+        <h1 className="text-xl sm:text-2xl font-bold text-center mb-5 sm:mb-6">
           Create a RailPass Account
         </h1>
 
-        <form className="space-y-4" onSubmit={handleSignup}>
+        {/* Form */}
+        <form className="space-y-3 sm:space-y-4" onSubmit={handleSignup}>
 
           <input
             type="text"
             placeholder="Full Name"
-            className="w-full border p-3 rounded-lg"
+            className="w-full border p-2.5 sm:p-3 rounded-lg text-sm sm:text-base"
             value={name}
             onChange={(e)=>setName(e.target.value)}
           />
@@ -64,7 +67,7 @@ export default function SignupPage() {
           <input
             type="text"
             placeholder="Phone Number"
-            className="w-full border p-3 rounded-lg"
+            className="w-full border p-2.5 sm:p-3 rounded-lg text-sm sm:text-base"
             value={phone}
             onChange={(e)=>setPhone(e.target.value)}
           />
@@ -72,7 +75,7 @@ export default function SignupPage() {
           <input
             type="email"
             placeholder="Email"
-            className="w-full border p-3 rounded-lg"
+            className="w-full border p-2.5 sm:p-3 rounded-lg text-sm sm:text-base"
             value={email}
             onChange={(e)=>setEmail(e.target.value)}
           />
@@ -80,12 +83,12 @@ export default function SignupPage() {
           <input
             type="password"
             placeholder="Password"
-            className="w-full border p-3 rounded-lg"
+            className="w-full border p-2.5 sm:p-3 rounded-lg text-sm sm:text-base"
             value={password}
             onChange={(e)=>setPassword(e.target.value)}
           />
 
-          <button className="w-full bg-orange-400 hover:bg-orange-300 text-white p-3 rounded-lg">
+          <button className="w-full bg-orange-400 hover:bg-orange-300 text-white p-2.5 sm:p-3 rounded-lg text-sm sm:text-base transition">
             Sign Up
           </button>
 
