@@ -8,9 +8,11 @@ export default function TicketSuccessPage() {
   const { ticket } = useTicket()
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
 
-      <TicketCard ticket={ticket} />
+      <div className="w-full max-w-md sm:max-w-lg">
+        <TicketCard ticket={ticket} />
+      </div>
 
     </div>
   )
