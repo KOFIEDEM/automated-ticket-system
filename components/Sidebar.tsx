@@ -42,37 +42,31 @@ export default function Sidebar({ isOpen }: Props) {
   ]
 
 
-  return (
+   return (
     <div
-      className={`bg-orange-400 text-white transition-all duration-300
-      ${isOpen ? "w-64" : "w-20"} h-screen overflow-y-auto p-4`}
+      className={`
+        fixed md:static top-0 left-0 h-full bg-orange-400 text-white
+        transition-transform duration-300 z-50
+
+        w-64 p-4 overflow-y-auto
+
+        ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+        md:translate-x-0
+      `}
     >
 
       {/* Logo */}
-
-      <div className="mb-10 ">
-
-        {isOpen ? (
-          <h1 className={`${pacifico.className} text-3xl tracking-wider flex items-center justify-center`}>
+      <div className="mb-10">
+        <h1 className={`${pacifico.className} text-3xl tracking-wider flex items-center justify-center gap-2`}>
           <TrainFront size={28} />
-             RailPass
-          </h1>
-        ) : (
-          <span className="text-xl font-bold flex items-center justify-center">
-            <TrainFront size={28} />
-          </span>
-        )}
-
+          RailPass
+        </h1>
       </div>
 
       {/* Navigation */}
-
       <nav className="space-y-3">
-
         {menuItems.map((item, index) => {
-
           const Icon = item.icon
-
           const isActive = pathname === item.path
 
           return (
@@ -80,24 +74,18 @@ export default function Sidebar({ isOpen }: Props) {
               key={index}
               href={item.path}
               className={`
-                flex items-center p-3 rounded transition-colors
-                ${isOpen ? "gap-3" : "justify-center"}
+                flex items-center gap-3 p-3 rounded transition-colors
                 ${isActive
                   ? "bg-green-200 text-orange-400 font-semibold"
                   : "hover:bg-white hover:text-orange-400"}
               `}
             >
-
               <Icon size={20} />
-
-              {isOpen && <span>{item.name}</span>}
-
+              <span>{item.name}</span>
             </Link>
           )
         })}
-
       </nav>
-
     </div>
   )
 }
