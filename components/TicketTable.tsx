@@ -22,51 +22,82 @@ export default function TicketTable() {
   ]
 
   return (
-    <Link href="/dashboard/tickets" className="block">
-    <div className="bg-green-50 p-6 rounded-lg shadow-orange-400/50 border border-orange-400 hover:shadow-lg transition-shadow">
+    <Link href="/dashboard/tickets" className="block w-full">
 
-      <h2 className="text-xl font-bold mb-4">
-        Recent Tickets
-      </h2>
+      <div className="w-full max-w-full overflow-hidden bg-green-50 p-4 sm:p-6 rounded-lg shadow-orange-400/50 border border-orange-400 hover:shadow-lg transition-shadow">
 
-      <table className="w-full">
+        <h2 className="text-lg sm:text-xl font-bold mb-4">
+          Recent Tickets
+        </h2>
 
-        <thead>
-          <tr className="text-left border-b">
+        {/* Desktop Table */}
+        <div className="hidden md:block overflow-x-auto">
+          <table className="w-full min-w-[500px] text-sm">
 
-            <th className="p-2">Ticket ID</th>
-            <th className="p-2">From</th>
-            <th className="p-2">To</th>
-            <th className="p-2">Date</th>
-            <th className="p-2">Class</th>
+            <thead>
+              <tr className="text-left border-b">
+                <th className="p-2">Ticket ID</th>
+                <th className="p-2">From</th>
+                <th className="p-2">To</th>
+                <th className="p-2">Date</th>
+                <th className="p-2">Class</th>
+              </tr>
+            </thead>
 
-          </tr>
-        </thead>
+            <tbody>
+              {tickets.map((ticket) => (
+                <tr key={ticket.id} className="border-b">
+                  <td className="p-2">{ticket.id}</td>
+                  <td className="p-2">{ticket.from}</td>
+                  <td className="p-2">{ticket.to}</td>
+                  <td className="p-2">{ticket.date}</td>
+                  <td className="p-2">{ticket.class}</td>
+                </tr>
+              ))}
+            </tbody>
 
-        <tbody>
+          </table>
+        </div>
+
+        {/* Mobile Cards */}
+        <div className="md:hidden space-y-3">
 
           {tickets.map((ticket) => (
-
-            <tr
+            <div
               key={ticket.id}
-              className="border-b"
+              className="bg-white rounded-lg p-3 shadow border"
             >
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-500">ID</span>
+                <span className="font-medium">{ticket.id}</span>
+              </div>
 
-              <td className="p-2">{ticket.id}</td>
-              <td className="p-2">{ticket.from}</td>
-              <td className="p-2">{ticket.to}</td>
-              <td className="p-2">{ticket.date}</td>
-              <td className="p-2">{ticket.class}</td>
+              <div className="flex justify-between text-sm mt-1">
+                <span className="text-gray-500">From</span>
+                <span>{ticket.from}</span>
+              </div>
 
-            </tr>
+              <div className="flex justify-between text-sm mt-1">
+                <span className="text-gray-500">To</span>
+                <span>{ticket.to}</span>
+              </div>
 
+              <div className="flex justify-between text-sm mt-1">
+                <span className="text-gray-500">Date</span>
+                <span>{ticket.date}</span>
+              </div>
+
+              <div className="flex justify-between text-sm mt-1">
+                <span className="text-gray-500">Class</span>
+                <span className="font-medium">{ticket.class}</span>
+              </div>
+            </div>
           ))}
 
-        </tbody>
+        </div>
 
-      </table>
-    
-    </div>
+      </div>
+
     </Link>
   )
 }

@@ -3,7 +3,7 @@ import TicketTable from '@/components/TicketTable'
 
 export default function DashboardPage() {
   return (
-    <div className="p-3 sm:p-6">
+    <div className="w-full max-w-full overflow-x-hidden p-3 sm:p-6">
 
       {/* Heading */}
       <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-4 sm:mb-6">
@@ -18,6 +18,7 @@ export default function DashboardPage() {
         lg:grid-cols-3 
         gap-3 sm:gap-6 
         mb-6 sm:mb-10
+        w-full
       ">
         <DashboardCard title="Total Tickets" value="12" />
         <DashboardCard title="Upcoming Trips" value="3" />
@@ -25,10 +26,13 @@ export default function DashboardPage() {
       </div>
 
       {/* Ticket Table */}
-      <div className="w-full overflow-x-auto rounded-lg bg-white shadow">
-        <div className="min-w-[600px]">
+      <div className="w-full rounded-lg bg-white shadow">
+
+        {/* Scroll only when needed */}
+        <div className="w-full overflow-x-auto">
           <TicketTable />
         </div>
+
       </div>
 
     </div>
