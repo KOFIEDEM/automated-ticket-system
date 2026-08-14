@@ -1,73 +1,56 @@
-import { calculateTicketPrice } from './ghanaCities'
-
-export const TICKETS_STORAGE_KEY = 'railwayTickets'
-
-export type SavedTicket = {
+export interface StoredTicket {
   id: string
   name: string
+  email?: string
+  phone?: string
   departure: string
   destination: string
   date: string
-  classType: string
   passengers: number
-  pricePerPassenger: number
+  classType: string
+  price: number
   totalPrice: number
   createdAt: string
 }
 
-export function getTickets(): SavedTicket[] {
-  if (typeof window === 'undefined') {
+const STORAGE_KEY = "railpass_tickets"
+
+export function getTickets(): StoredTicket[] {
+  if (typeof window === "undefined") {
     return []
   }
 
   try {
-    const storedTickets = localStorage.getItem(
-      TICKETS_STORAGE_KEY
-    )
+    const stored = localStorage.getItem(STORAGE_KEY)
 
-    if (!storedTickets) {
+    if (!stored) {
       return []
     }
 
-    return JSON.parse(storedTickets)
+    return JSON.parse(stored)
   } catch (error) {
-    console.error('Failed to load tickets:', error)
+    console.error("Unable to read tickets:", error)
     return []
   }
 }
 
-export function saveTicket(ticket: any): SavedTicket {
-  const pricePerPassenger = calculateTicketPrice(
-    ticket.departure,
-    ticket.destination
-  )
-
-  const passengers = Number(ticket.passengers) || 1
-
-  const newTicket: SavedTicket = {
-    id: `TK${Math.floor(100000 + Math.random() * 900000)}`,
-    name: ticket.name,
-    departure: ticket.departure,
-    destination: ticket.destination,
-    date: ticket.date,
-    classType: ticket.classType || 'Economy',
-    passengers,
-    pricePerPassenger,
-    totalPrice: pricePerPassenger * passengers,
-    createdAt: new Date().toISOString(),
+export function saveTicket(ticket: StoredTicket): void {
+  if (typeof window === "undefined") {
+    return
   }
 
-  const existingTickets = getTickets()
-
-  const updatedTickets = [
-    newTicket,
-    ...existingTickets,
-  ]
+  const tickets = getTickets()
 
   localStorage.setItem(
-    TICKETS_STORAGE_KEY,
-    JSON.stringify(updatedTickets)
+    STORAGE_KEY,
+    JSON.stringify([ticket, ...tickets])
   )
+}
 
-  return newTicket
+export function clearTickets(): void {
+  if (typeof window === "undefined") {
+    return
+  }
+
+  localStorage.removeItem(STORAGE_KEY)
 }

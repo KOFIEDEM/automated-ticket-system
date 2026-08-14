@@ -1,28 +1,34 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { ArrowRight, MapPin, Search } from 'lucide-react'
 import { useTicket } from '@/context/TicketContext'
-import { ArrowRight, ChevronDown } from 'lucide-react'
-import {
-  GHANA_CITIES,
-  calculateTicketPrice,
-} from '../src/lib/ghanaCities'
+import { GHANA_CITIES } from '@/src/lib/cities'
 
-function CityAutocomplete({
-  label,
-  value,
-  onChange,
-}: {
+interface Props {
+  nextStep: () => void
+}
+
+interface CityDropdownProps {
   label: string
   value: string
   onChange: (value: string) => void
-}) {
+  excludeCity?: string
+}
+
+function CityDropdown({
+  label,
+  value,
+  onChange,
+  excludeCity,
+}: CityDropdownProps) {
   const [open, setOpen] = useState(false)
+  const [search, setSearch] = useState(value)
   const wrapperRef = useRef<HTMLDivElement>(null)
 
-  const filteredCities = GHANA_CITIES.filter((city) =>
-    city.name.toLowerCase().includes(value.toLowerCase())
-  )
+  useEffect(() => {
+    setSearch(value)
+  }, [value])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -41,62 +47,72 @@ function CityAutocomplete({
     }
   }, [])
 
+  const filteredCities = GHANA_CITIES.filter((city) => {
+    const matchesSearch = city.name
+      .toLowerCase()
+      .includes(search.toLowerCase())
+
+    const isNotExcluded =
+      city.name.toLowerCase() !== excludeCity?.toLowerCase()
+
+    return matchesSearch && isNotExcluded
+  })
+
   const handleSelect = (city: string) => {
     onChange(city)
+    setSearch(city)
     setOpen(false)
   }
 
   return (
-    <div
-      ref={wrapperRef}
-      className="relative"
-    >
-      <label className="block text-sm font-medium text-gray-700 mb-2">
+    <div ref={wrapperRef} className="relative">
+      <label className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-700">
+        <MapPin size={16} className="text-orange-500" />
         {label}
       </label>
 
       <div className="relative">
+        <Search
+          size={18}
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+        />
+
         <input
           type="text"
-          placeholder={label}
-          value={value}
-          autoComplete="off"
+          value={search}
+          placeholder={`Search ${label.toLowerCase()}...`}
           onFocus={() => setOpen(true)}
           onChange={(e) => {
+            setSearch(e.target.value)
             onChange(e.target.value)
             setOpen(true)
           }}
-          className="w-full border border-orange-400 p-2 pr-10 rounded focus:outline-none focus:ring-2 focus:ring-orange-300"
-        />
-
-        <ChevronDown
-          size={20}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"
+          className="w-full rounded-xl border border-orange-300 bg-white py-3 pl-10 pr-4 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
         />
       </div>
 
       {open && (
-        <div className="absolute z-50 mt-1 w-full max-h-60 overflow-y-auto rounded-lg border border-orange-300 bg-white shadow-lg">
+        <div className="absolute left-0 right-0 z-50 mt-2 max-h-60 overflow-y-auto rounded-xl border border-orange-100 bg-white shadow-xl">
           {filteredCities.length > 0 ? (
             filteredCities.map((city) => (
               <button
                 key={city.name}
                 type="button"
                 onClick={() => handleSelect(city.name)}
-                className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-orange-50 transition-colors"
+                className="flex w-full items-center justify-between px-4 py-3 text-left text-sm transition hover:bg-orange-50"
               >
-                <span className="text-gray-800">
+                <span className="font-medium text-gray-700">
                   {city.name}
                 </span>
 
-                <span className="text-sm text-gray-500">
-                  GHS {city.price}
+                <span className="text-xs text-gray-400">
+                  From ₵{city.price}
                 </span>
               </button>
             ))
           ) : (
-            <div className="px-4 py-3 text-sm text-gray-500">
-              No city found
+            <div className="px-4 py-4 text-sm text-gray-500">
+              No matching Ghanaian city found.
             </div>
           )}
         </div>
@@ -105,98 +121,88 @@ function CityAutocomplete({
   )
 }
 
-export default function TicketForm({
-  nextStep,
-}: any) {
+export default function TicketForm({ nextStep }: Props) {
   const { ticket, updateTicket } = useTicket()
 
-  const ticketPrice = calculateTicketPrice(
-    ticket.departure,
-    ticket.destination
-  )
-
-  const hasValidRoute =
-    GHANA_CITIES.some(
-      (city) => city.name === ticket.departure
-    ) &&
-    GHANA_CITIES.some(
-      (city) => city.name === ticket.destination
-    )
+  const canContinue =
+    ticket.departure &&
+    ticket.destination &&
+    ticket.departure.toLowerCase() !==
+      ticket.destination.toLowerCase() &&
+    ticket.date
 
   return (
-    <div className="backdrop-blur-xl bg-green-50 border border-orange-400 shadow-lg p-6 rounded-lg w-full">
+    <div className="w-full overflow-visible rounded-2xl border border-orange-200 bg-gradient-to-br from-green-50 via-white to-orange-50 p-4 shadow-xl sm:p-6">
+      <div className="mb-6">
+        <p className="text-sm font-medium text-orange-500">
+          STEP 1 OF 3
+        </p>
 
-      {/* Departure City */}
-      <div className="p-5">
-        <CityAutocomplete
+        <h2 className="mt-1 text-2xl font-bold text-gray-800">
+          Plan Your Journey
+        </h2>
+
+        <p className="mt-1 text-sm text-gray-500">
+          Choose your departure city, destination and travel date.
+        </p>
+      </div>
+
+      <div className="space-y-5">
+        <CityDropdown
           label="Departure City"
           value={ticket.departure}
           onChange={(value) =>
-            updateTicket({
-              departure: value,
-            })
+            updateTicket({ departure: value })
           }
+          excludeCity={ticket.destination}
         />
-      </div>
 
-      {/* Destination */}
-      <div className="p-5">
-        <CityAutocomplete
+        <CityDropdown
           label="Destination"
           value={ticket.destination}
           onChange={(value) =>
-            updateTicket({
-              destination: value,
-            })
+            updateTicket({ destination: value })
           }
+          excludeCity={ticket.departure}
         />
-      </div>
 
-      {/* Departure Date */}
-      <div className="p-5">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Departure Date
-        </label>
+        <div>
+          <label className="mb-2 block text-sm font-semibold text-gray-700">
+            Departure Date
+          </label>
 
-        <input
-          type="date"
-          className="w-full border border-orange-400 p-2 rounded focus:outline-none focus:ring-2 focus:ring-orange-300"
-          value={ticket.date}
-          onChange={(e) =>
-            updateTicket({
-              date: e.target.value,
-            })
-          }
-        />
-      </div>
-
-      {/* Price Preview */}
-      {hasValidRoute && (
-        <div className="mx-5 mb-5 rounded-lg bg-white border border-orange-200 p-4">
-          <div className="flex justify-between items-center">
-            <span className="text-gray-600">
-              Estimated Ticket Price
-            </span>
-
-            <span className="text-xl font-bold text-green-600">
-              GHS {ticketPrice.toFixed(2)}
-            </span>
-          </div>
+          <input
+            type="date"
+            min={new Date().toISOString().split('T')[0]}
+            value={ticket.date}
+            onChange={(e) =>
+              updateTicket({ date: e.target.value })
+            }
+            className="w-full rounded-xl border border-orange-300 bg-white p-3 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+          />
         </div>
-      )}
+      </div>
 
-      {/* Navigation */}
-      <div className="flex justify-end p-5">
+      {ticket.departure &&
+        ticket.destination &&
+        ticket.departure.toLowerCase() ===
+          ticket.destination.toLowerCase() && (
+          <p className="mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-600">
+            Departure and destination cannot be the same city.
+          </p>
+        )}
+
+      <div className="mt-6 flex justify-end">
         <button
           type="button"
+          disabled={!canContinue}
           onClick={nextStep}
-          className="px-4 py-2 text-green-400 hover:text-green-500 transition-transform hover:scale-110 flex items-center gap-2"
+          className="flex items-center gap-2 rounded-xl bg-orange-500 px-5 py-3 font-semibold text-white shadow-lg transition hover:bg-orange-600 hover:shadow-orange-200 disabled:cursor-not-allowed disabled:bg-gray-300 disabled:shadow-none"
         >
-          Next
-          <ArrowRight size={30} />
+          Continue
+          <ArrowRight size={20} />
         </button>
       </div>
-
     </div>
   )
 }

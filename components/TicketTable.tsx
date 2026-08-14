@@ -1,276 +1,173 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 import {
   ArrowRight,
   CalendarDays,
-  ReceiptText,
   Ticket as TicketIcon,
 } from 'lucide-react'
-
 import {
   getTickets,
-  SavedTicket,
-} from '../src/lib/ticketStorage'
+  StoredTicket,
+} from '@/src/lib/ticketStorage'
 
 export default function TicketTable() {
-  const [tickets, setTickets] = useState<SavedTicket[]>([])
+  const [tickets, setTickets] = useState<StoredTicket[]>([])
 
   useEffect(() => {
-    const storedTickets = getTickets()
-
-    // Only show the latest 5 tickets
-    setTickets(storedTickets.slice(0, 5))
+    setTickets(getTickets().slice(0, 5))
   }, [])
 
   return (
-    <Link
-      href="/dashboard/tickets"
-      className="block w-full"
-    >
+    <Link href="/dashboard/tickets" className="block w-full">
+      <div className="w-full overflow-hidden rounded-3xl border border-orange-200 bg-gradient-to-br from-green-50 via-white to-orange-50 p-4 shadow-lg transition hover:shadow-xl sm:p-6">
+        <div className="mb-5 flex items-center justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-orange-500">
+              Activity
+            </p>
 
-      <div className="w-full overflow-hidden rounded-2xl border border-orange-200 bg-green-50 shadow-lg hover:shadow-xl transition-shadow">
-
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-orange-200 p-5 sm:p-6">
-
-          <div className="flex items-center gap-3">
-
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-100 text-orange-500">
-              <ReceiptText size={21} />
-            </div>
-
-            <div>
-              <h2 className="text-lg sm:text-xl font-bold text-gray-800">
-                Recent Tickets
-              </h2>
-
-              <p className="text-xs sm:text-sm text-gray-500">
-                Your latest railway journeys
-              </p>
-            </div>
-
+            <h2 className="text-xl font-bold text-gray-800">
+              Recent Tickets
+            </h2>
           </div>
 
-          <span className="hidden sm:block text-sm font-medium text-green-600">
-            View all →
-          </span>
-
+          <div className="rounded-xl bg-orange-100 p-3 text-orange-500">
+            <TicketIcon size={21} />
+          </div>
         </div>
 
-        {/* Empty State */}
-        {tickets.length === 0 && (
-          <div className="p-10 text-center">
+        {tickets.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-orange-200 bg-white p-8 text-center">
+            <TicketIcon
+              size={35}
+              className="mx-auto mb-3 text-orange-300"
+            />
 
-            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-orange-100 text-orange-500">
-              <TicketIcon size={23} />
-            </div>
-
-            <p className="font-medium text-gray-700">
+            <p className="font-medium text-gray-600">
               No recent tickets
             </p>
 
             <p className="mt-1 text-sm text-gray-400">
-              Generated tickets will appear here.
+              Book a journey to see it here.
             </p>
-
           </div>
-        )}
-
-        {/* Desktop */}
-        {tickets.length > 0 && (
-          <div className="hidden md:block overflow-x-auto">
-
-            <table className="w-full">
-
-              <thead>
-                <tr className="text-left border-b border-orange-200 text-xs uppercase tracking-wider text-gray-400">
-
-                  <th className="px-5 py-4">
-                    Ticket
-                  </th>
-
-                  <th className="px-5 py-4">
-                    Journey
-                  </th>
-
-                  <th className="px-5 py-4">
-                    Date
-                  </th>
-
-                  <th className="px-5 py-4">
-                    Class
-                  </th>
-
-                  <th className="px-5 py-4">
-                    Fare
-                  </th>
-
-                </tr>
-              </thead>
-
-              <tbody>
-
-                {tickets.map((ticket) => (
-                  <tr
-                    key={ticket.id}
-                    className="border-b border-gray-100 last:border-0 hover:bg-white/70 transition-colors"
-                  >
-
-                    <td className="px-5 py-4">
-                      <p className="font-mono text-sm font-bold text-green-700">
-                        #{ticket.id}
-                      </p>
-
-                      <p className="text-xs text-gray-400">
-                        {ticket.name}
-                      </p>
-                    </td>
-
-                    <td className="px-5 py-4">
-
-                      <div className="flex items-center gap-2 text-sm">
-                        <span className="font-semibold text-gray-800">
-                          {ticket.departure}
-                        </span>
-
-                        <ArrowRight
-                          size={14}
-                          className="text-orange-400"
-                        />
-
-                        <span className="font-semibold text-gray-800">
-                          {ticket.destination}
-                        </span>
-                      </div>
-
-                    </td>
-
-                    <td className="px-5 py-4">
-
-                      <div className="flex items-center gap-2 text-sm text-gray-500">
-                        <CalendarDays size={15} />
-                        {ticket.date}
-                      </div>
-
-                    </td>
-
-                    <td className="px-5 py-4">
-
-                      <span className="rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-700 capitalize">
-                        {ticket.classType}
-                      </span>
-
-                    </td>
-
-                    <td className="px-5 py-4">
-
-                      <span className="font-bold text-green-700">
-                        ₵{ticket.totalPrice.toFixed(2)}
-                      </span>
-
-                    </td>
-
+        ) : (
+          <>
+            <div className="hidden overflow-x-auto md:block">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-orange-100 text-left text-xs uppercase tracking-wide text-gray-400">
+                    <th className="p-3">Ticket</th>
+                    <th className="p-3">Journey</th>
+                    <th className="p-3">Date</th>
+                    <th className="p-3">Class</th>
+                    <th className="p-3">Total</th>
                   </tr>
-                ))}
+                </thead>
 
-              </tbody>
+                <tbody>
+                  {tickets.map((ticket) => (
+                    <tr
+                      key={ticket.id}
+                      className="border-b border-gray-100 transition last:border-0 hover:bg-orange-50/50"
+                    >
+                      <td className="p-3">
+                        <span className="font-mono text-sm font-semibold text-gray-700">
+                          #{ticket.id}
+                        </span>
+                      </td>
 
-            </table>
+                      <td className="p-3">
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="font-semibold">
+                            {ticket.departure}
+                          </span>
 
-          </div>
-        )}
+                          <ArrowRight
+                            size={15}
+                            className="text-orange-400"
+                          />
 
-        {/* Mobile */}
-        {tickets.length > 0 && (
-          <div className="md:hidden p-4 space-y-3">
+                          <span className="font-semibold">
+                            {ticket.destination}
+                          </span>
+                        </div>
+                      </td>
 
-            {tickets.map((ticket) => (
-              <div
-                key={ticket.id}
-                className="rounded-xl border border-orange-100 bg-white p-4 shadow-sm"
-              >
+                      <td className="p-3">
+                        <div className="flex items-center gap-2 text-sm text-gray-600">
+                          <CalendarDays
+                            size={15}
+                            className="text-orange-400"
+                          />
 
-                <div className="flex items-center justify-between mb-3">
+                          {ticket.date}
+                        </div>
+                      </td>
 
-                  <div>
-                    <p className="font-mono text-sm font-bold text-green-700">
+                      <td className="p-3">
+                        <span className="rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+                          {ticket.classType}
+                        </span>
+                      </td>
+
+                      <td className="p-3 font-bold text-orange-500">
+                        ₵{ticket.totalPrice}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="space-y-3 md:hidden">
+              {tickets.map((ticket) => (
+                <div
+                  key={ticket.id}
+                  className="rounded-2xl border border-orange-100 bg-white p-4 shadow-sm"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-mono text-xs font-bold text-gray-600">
                       #{ticket.id}
-                    </p>
+                    </span>
 
-                    <p className="text-xs text-gray-400">
-                      {ticket.name}
-                    </p>
+                    <span className="rounded-full bg-green-100 px-2 py-1 text-xs text-green-700">
+                      {ticket.classType}
+                    </span>
                   </div>
 
-                  <span className="rounded-full bg-purple-100 px-2.5 py-1 text-xs font-semibold text-purple-700 capitalize">
-                    {ticket.classType}
-                  </span>
-
-                </div>
-
-                <div className="flex items-center justify-between">
-
-                  <div>
-                    <p className="text-xs text-gray-400">
-                      From
-                    </p>
-
-                    <p className="font-semibold text-gray-800">
+                  <div className="mt-4 flex items-center gap-2">
+                    <span className="font-bold">
                       {ticket.departure}
-                    </p>
-                  </div>
+                    </span>
 
-                  <ArrowRight
-                    size={17}
-                    className="text-orange-400"
-                  />
+                    <ArrowRight
+                      size={16}
+                      className="text-orange-400"
+                    />
 
-                  <div className="text-right">
-                    <p className="text-xs text-gray-400">
-                      To
-                    </p>
-
-                    <p className="font-semibold text-gray-800">
+                    <span className="font-bold">
                       {ticket.destination}
-                    </p>
+                    </span>
                   </div>
 
-                </div>
-
-                <div className="mt-4 flex justify-between border-t border-gray-100 pt-3">
-
-                  <div>
-                    <p className="text-xs text-gray-400">
-                      Date
-                    </p>
-
-                    <p className="text-sm font-medium text-gray-700">
+                  <div className="mt-3 flex items-center justify-between text-sm">
+                    <span className="text-gray-500">
                       {ticket.date}
-                    </p>
+                    </span>
+
+                    <span className="font-bold text-orange-500">
+                      ₵{ticket.totalPrice}
+                    </span>
                   </div>
-
-                  <div className="text-right">
-                    <p className="text-xs text-gray-400">
-                      Fare
-                    </p>
-
-                    <p className="font-bold text-green-700">
-                      ₵{ticket.totalPrice.toFixed(2)}
-                    </p>
-                  </div>
-
                 </div>
-
-              </div>
-            ))}
-
-          </div>
+              ))}
+            </div>
+          </>
         )}
-
       </div>
-
     </Link>
   )
 }

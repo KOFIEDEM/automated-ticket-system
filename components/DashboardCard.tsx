@@ -9,7 +9,8 @@ import {
 
 interface Props {
   title: string
-  value: string
+  value: string | number
+  description?: string
 }
 
 const cardConfig: Record<
@@ -50,6 +51,7 @@ const cardConfig: Record<
 export default function DashboardCard({
   title,
   value,
+  description,
 }: Props) {
   const config =
     cardConfig[title] ?? cardConfig['Total Tickets']

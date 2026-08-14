@@ -1,143 +1,147 @@
 'use client'
 
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useTicket } from '@/context/TicketContext'
-import { ArrowLeft } from 'lucide-react'
-import { calculateTicketPrice } from '../src/lib/ghanaCities'
-import { saveTicket } from '../src/lib/ticketStorage'
+import {
+  ArrowLeft,
+  CalendarDays,
+  MapPin,
+  Ticket,
+  Users,
+  User,
+  CheckCircle,
+} from 'lucide-react'
 
-export default function OrderSummary({ prevStep }: any) {
+import { useTicket } from '@/context/TicketContext'
+import { getTicketPrice } from '@/src/lib/cities'
+import { saveTicket } from '@/src/lib/ticketStorage'
+import { supabase } from '@/lib/supabaseClient'
+
+interface Props {
+  prevStep: () => void
+}
+
+export default function OrderSummary({ prevStep }: Props) {
   const { ticket } = useTicket()
   const router = useRouter()
 
-  const pricePerPassenger = calculateTicketPrice(
+  const [loading, setLoading] = useState(false)
+
+  /*
+   * Calculate the journey price in ONE place.
+   * This value will also be saved to the generated ticket.
+   */
+  const basePrice = getTicketPrice(
     ticket.departure,
     ticket.destination
   )
 
+  const classMultiplier =
+    ticket.classType === 'Business' ? 1.5 : 1
+
+  const pricePerPassenger =
+    Math.round(basePrice * classMultiplier * 100) / 100
+
   const passengers = Number(ticket.passengers) || 1
 
   const totalPrice =
-    pricePerPassenger * passengers
+    Math.round(pricePerPassenger * passengers * 100) / 100
 
-  const handleGenerateTicket = () => {
-    const savedTicket = saveTicket(ticket)
+  const generateTicket = async () => {
+    setLoading(true)
 
-    // Save the generated ticket ID so the success
-    // page/ticket card can use the same ID.
-    localStorage.setItem(
-      'latestTicket',
-      JSON.stringify(savedTicket)
-    )
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
 
-    router.push('/dashboard/ticket-success')
+      const ticketId = `TK${Date.now()
+        .toString()
+        .slice(-8)}`
+
+      /*
+       * Save the EXACT calculated price.
+       *
+       * TicketCard will use these values instead of
+       * calculating the fare again.
+       */
+      saveTicket({
+        id: ticketId,
+
+        name: ticket.name,
+
+        email: user?.email ?? '',
+
+        phone: user?.user_metadata?.phone ?? '',
+
+        departure: ticket.departure,
+
+        destination: ticket.destination,
+
+        date: ticket.date,
+
+        passengers,
+
+        classType: ticket.classType,
+
+        price: pricePerPassenger,
+
+        totalPrice,
+        
+        createdAt: new Date().toISOString(),
+      })
+
+      router.push(
+        `/dashboard/ticket-success?id=${ticketId}`
+      )
+    } catch (error) {
+      console.error('Unable to generate ticket:', error)
+
+      alert(
+        'Unable to generate ticket. Please try again.'
+      )
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
-    <div className="backdrop-blur-xl bg-green-50 border border-orange-400 shadow-lg p-6 rounded-2xl w-full">
+    <div className="w-full rounded-2xl border border-orange-200 bg-gradient-to-br from-green-50 via-white to-orange-50 p-4 shadow-xl sm:p-6">
 
-      <div className="space-y-5 p-5">
+      {/* Header */}
+      <div className="mb-6">
+        <p className="text-sm font-medium text-orange-500">
+          STEP 3 OF 3
+        </p>
 
-        {/* Header */}
-        <div>
-          <p className="text-sm font-medium text-orange-500">
-            Final Review
-          </p>
+        <h2 className="mt-1 text-2xl font-bold text-gray-800">
+          Review Your Ticket
+        </h2>
 
-          <h2 className="text-2xl font-bold text-gray-800">
-            Ticket Summary
-          </h2>
+        <p className="mt-1 text-sm text-gray-500">
+          Check your journey details and fare before generating your ticket.
+        </p>
+      </div>
 
-          <p className="text-sm text-gray-500 mt-1">
-            Review your journey details before generating your ticket.
-          </p>
-        </div>
+      {/* Ticket Preview */}
+      <div className="overflow-hidden rounded-2xl border border-orange-100 bg-white shadow-sm">
 
-        {/* Journey */}
-        <div className="rounded-xl bg-white border border-orange-200 p-5">
+        {/* Preview Header */}
+        <div className="border-b border-orange-100 bg-gradient-to-r from-green-700 to-green-600 p-5 text-white">
 
-          <p className="text-xs uppercase tracking-wider text-gray-400 mb-4">
-            Journey
-          </p>
+          <div className="flex items-center gap-3">
 
-          <div className="flex items-center justify-between gap-4">
-
-            <div>
-              <p className="text-xs text-gray-400">
-                From
-              </p>
-
-              <p className="text-lg font-bold text-gray-800">
-                {ticket.departure || 'N/A'}
-              </p>
-            </div>
-
-            <div className="h-9 w-9 shrink-0 rounded-full bg-orange-100 flex items-center justify-center text-orange-500">
-              →
-            </div>
-
-            <div className="text-right">
-              <p className="text-xs text-gray-400">
-                To
-              </p>
-
-              <p className="text-lg font-bold text-gray-800">
-                {ticket.destination || 'N/A'}
-              </p>
-            </div>
-
-          </div>
-
-          <div className="mt-4 pt-4 border-t border-dashed border-gray-200">
-
-            <p className="text-xs text-gray-400">
-              Departure Date
-            </p>
-
-            <p className="font-semibold text-gray-800">
-              {ticket.date || 'N/A'}
-            </p>
-
-          </div>
-
-        </div>
-
-        {/* Passenger Details */}
-        <div className="rounded-xl bg-white border border-orange-200 p-5">
-
-          <p className="text-xs uppercase tracking-wider text-gray-400 mb-4">
-            Passenger Details
-          </p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-            <div>
-              <p className="text-xs text-gray-400">
-                Passenger
-              </p>
-
-              <p className="font-semibold text-gray-800">
-                {ticket.name || 'N/A'}
-              </p>
+            <div className="rounded-xl bg-white/20 p-3">
+              <Ticket size={24} />
             </div>
 
             <div>
-              <p className="text-xs text-gray-400">
-                Number of Passengers
-              </p>
+              <h3 className="font-bold">
+                RailPass Journey
+              </h3>
 
-              <p className="font-semibold text-gray-800">
-                {passengers}
-              </p>
-            </div>
-
-            <div>
-              <p className="text-xs text-gray-400">
-                Class
-              </p>
-
-              <p className="font-semibold text-gray-800 capitalize">
-                {ticket.classType || 'Economy'}
+              <p className="text-sm text-green-100">
+                Ticket preview
               </p>
             </div>
 
@@ -145,61 +149,201 @@ export default function OrderSummary({ prevStep }: any) {
 
         </div>
 
-        {/* Price */}
-        <div className="rounded-xl bg-green-700 text-white p-5">
+        {/* Journey Details */}
+        <div className="space-y-5 p-5">
 
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm text-green-100">
-              Price per passenger
-            </span>
+          <div className="grid gap-5 sm:grid-cols-2">
 
-            <span className="font-medium">
-              ₵{pricePerPassenger.toFixed(2)}
-            </span>
+            {/* Departure */}
+            <div className="flex items-start gap-3">
+
+              <MapPin
+                className="mt-1 text-orange-500"
+                size={19}
+              />
+
+              <div>
+                <p className="text-xs text-gray-400">
+                  Departure
+                </p>
+
+                <p className="font-semibold text-gray-800">
+                  {ticket.departure || 'N/A'}
+                </p>
+              </div>
+
+            </div>
+
+            {/* Destination */}
+            <div className="flex items-start gap-3">
+
+              <MapPin
+                className="mt-1 text-green-600"
+                size={19}
+              />
+
+              <div>
+                <p className="text-xs text-gray-400">
+                  Destination
+                </p>
+
+                <p className="font-semibold text-gray-800">
+                  {ticket.destination || 'N/A'}
+                </p>
+              </div>
+
+            </div>
+
+            {/* Date */}
+            <div className="flex items-start gap-3">
+
+              <CalendarDays
+                className="mt-1 text-orange-500"
+                size={19}
+              />
+
+              <div>
+                <p className="text-xs text-gray-400">
+                  Departure Date
+                </p>
+
+                <p className="font-semibold text-gray-800">
+                  {ticket.date || 'N/A'}
+                </p>
+              </div>
+
+            </div>
+
+            {/* Passenger */}
+            <div className="flex items-start gap-3">
+
+              <User
+                className="mt-1 text-orange-500"
+                size={19}
+              />
+
+              <div>
+                <p className="text-xs text-gray-400">
+                  Passenger
+                </p>
+
+                <p className="font-semibold text-gray-800">
+                  {ticket.name || 'N/A'}
+                </p>
+              </div>
+
+            </div>
+
+            {/* Number of passengers */}
+            <div className="flex items-start gap-3">
+
+              <Users
+                className="mt-1 text-orange-500"
+                size={19}
+              />
+
+              <div>
+                <p className="text-xs text-gray-400">
+                  Passengers
+                </p>
+
+                <p className="font-semibold text-gray-800">
+                  {passengers}
+                </p>
+              </div>
+
+            </div>
+
+            {/* Class */}
+            <div className="flex items-start gap-3">
+
+              <Ticket
+                className="mt-1 text-orange-500"
+                size={19}
+              />
+
+              <div>
+                <p className="text-xs text-gray-400">
+                  Class
+                </p>
+
+                <p className="font-semibold text-gray-800">
+                  {ticket.classType || 'Economy'}
+                </p>
+              </div>
+
+            </div>
+
           </div>
 
-          <div className="flex justify-between items-center mb-4">
-            <span className="text-sm text-green-100">
-              Passengers
-            </span>
+          {/* Price */}
+          <div className="border-t border-dashed border-gray-200 pt-5">
 
-            <span className="font-medium">
-              × {passengers}
-            </span>
-          </div>
+            <div className="flex items-center justify-between text-sm text-gray-500">
+              <span>Price per passenger</span>
 
-          <div className="border-t border-green-500 pt-4 flex justify-between items-center">
-            <span className="font-semibold">
-              Total Fare
-            </span>
+              <span className="font-medium text-gray-700">
+                ₵{pricePerPassenger.toFixed(2)}
+              </span>
+            </div>
 
-            <span className="text-2xl font-bold">
-              ₵{totalPrice.toFixed(2)}
-            </span>
+            <div className="mt-2 flex items-center justify-between text-sm text-gray-500">
+              <span>Passengers</span>
+
+              <span>
+                × {passengers}
+              </span>
+            </div>
+
+            <div className="mt-4 rounded-xl bg-green-50 p-4">
+
+              <div className="flex items-center justify-between">
+
+                <span className="font-semibold text-gray-700">
+                  Total Fare
+                </span>
+
+                <span className="text-2xl font-bold text-green-700">
+                  ₵{totalPrice.toFixed(2)}
+                </span>
+
+              </div>
+
+            </div>
+
           </div>
 
         </div>
 
       </div>
 
-      {/* Navigation */}
-      <div className="flex justify-between items-center p-5">
+      {/* Buttons */}
+      <div className="mt-6 flex items-center justify-between gap-4">
 
         <button
           type="button"
           onClick={prevStep}
-          className="px-4 py-2 text-red-400 hover:text-red-500 transition-transform hover:scale-110 flex items-center gap-2"
+          disabled={loading}
+          className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 font-semibold text-gray-600 transition hover:bg-gray-50 disabled:opacity-50"
         >
-          <ArrowLeft size={28} />
+          <ArrowLeft size={19} />
           Back
         </button>
 
         <button
           type="button"
-          onClick={handleGenerateTicket}
-          className="bg-orange-400 hover:bg-orange-500 text-white px-5 py-3 rounded-xl font-medium shadow-md hover:shadow-lg transition-all"
+          onClick={generateTicket}
+          disabled={loading}
+          className="flex items-center gap-2 rounded-xl bg-orange-500 px-5 py-3 font-semibold text-white shadow-lg transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:bg-gray-300"
         >
-          Generate Ticket
+          {loading ? (
+            'Generating...'
+          ) : (
+            <>
+              <CheckCircle size={19} />
+              Generate Ticket
+            </>
+          )}
         </button>
 
       </div>

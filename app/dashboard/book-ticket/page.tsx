@@ -5,7 +5,7 @@ import { useState } from 'react'
 import Stepper from '@/components/Stepper'
 import TicketForm from '@/components/TicketForm'
 import PassengerForm from '@/components/PassengerForm'
-import SeatSelection from '@/components/SeatSelection'
+// import SeatSelection from '@/components/SeatSelection'
 import OrderSummary from '@/components/OrderSummary'
 
 export default function BookTicketPage() {
@@ -22,8 +22,8 @@ export default function BookTicketPage() {
 
       {step === 1 && <TicketForm nextStep={nextStep} />}
       {step === 2 && <PassengerForm nextStep={nextStep} prevStep={prevStep} />}
-      {step === 3 && <SeatSelection nextStep={nextStep} prevStep={prevStep} />}
-      {step === 4 && <OrderSummary prevStep={prevStep} />}
+      {/* {step === 3 && <SeatSelection nextStep={nextStep} prevStep={prevStep} />} */}
+      {step === 3 && <OrderSummary prevStep={prevStep} />}
 
     </div>
   )

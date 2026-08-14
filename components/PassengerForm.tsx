@@ -1,81 +1,123 @@
 'use client'
 
+import { ArrowLeft, ArrowRight, Users } from 'lucide-react'
 import { useTicket } from '@/context/TicketContext'
-import { ArrowRight, ArrowLeft } from 'lucide-react'
+
+interface Props {
+  nextStep: () => void
+  prevStep: () => void
+}
 
 export default function PassengerForm({
   nextStep,
   prevStep,
-}: any) {
+}: Props) {
   const { ticket, updateTicket } = useTicket()
 
+  const canContinue =
+    ticket.name.trim().length > 0 &&
+    ticket.passengers > 0
+
   return (
-    <div className="backdrop-blur-xl bg-green-50 border border-orange-400 shadow-lg p-6 rounded-lg w-full">
+    <div className="w-full rounded-2xl border border-orange-200 bg-gradient-to-br from-green-50 via-white to-orange-50 p-4 shadow-xl sm:p-6">
+      <div className="mb-6">
+        <p className="text-sm font-medium text-orange-500">
+          STEP 2 OF 3
+        </p>
 
-      {/* Passenger Name */}
-      <div className="p-5">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Passenger Name
-        </label>
+        <h2 className="mt-1 text-2xl font-bold text-gray-800">
+          Passenger Details
+        </h2>
 
-        <input
-          type="text"
-          placeholder="Passenger Name"
-          className="w-full border border-orange-400 p-2 rounded focus:outline-none focus:ring-2 focus:ring-orange-300"
-          value={ticket.name}
-          onChange={(e) =>
-            updateTicket({
-              name: e.target.value,
-            })
-          }
-        />
+        <p className="mt-1 text-sm text-gray-500">
+          Tell us who will be travelling.
+        </p>
       </div>
 
-      {/* Number of Passengers */}
-      <div className="p-5">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Number of Passengers
-        </label>
+      <div className="space-y-5">
+        <div>
+          <label className="mb-2 block text-sm font-semibold text-gray-700">
+            Passenger Name
+          </label>
 
-        <input
-          type="number"
-          min="1"
-          placeholder="Number of Passengers"
-          className="w-full border border-orange-400 p-2 rounded focus:outline-none focus:ring-2 focus:ring-orange-300"
-          value={ticket.passengers}
-          onChange={(e) => {
-            const value = Number(e.target.value)
+          <input
+            type="text"
+            placeholder="Enter passenger name"
+            value={ticket.name}
+            onChange={(e) =>
+              updateTicket({ name: e.target.value })
+            }
+            className="w-full rounded-xl border border-orange-300 bg-white p-3 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+          />
+        </div>
 
-            updateTicket({
-              passengers: value < 1 ? 1 : value,
-            })
-          }}
-        />
+        <div>
+          <label className="mb-2 flex items-center gap-2 text-sm font-semibold text-gray-700">
+            <Users size={17} className="text-orange-500" />
+            Number of Passengers
+          </label>
+
+          <input
+            type="number"
+            min="1"
+            max="10"
+            value={ticket.passengers || 1}
+            onChange={(e) =>
+              updateTicket({
+                passengers: Math.max(
+                  1,
+                  Math.min(10, Number(e.target.value))
+                ),
+              })
+            }
+            className="w-full rounded-xl border border-orange-300 bg-white p-3 outline-none transition focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+          />
+
+          <p className="mt-1 text-xs text-gray-400">
+            Maximum of 10 passengers per booking.
+          </p>
+        </div>
+
+        <div>
+          <label className="mb-2 block text-sm font-semibold text-gray-700">
+            Travel Class
+          </label>
+
+          <select
+            value={ticket.classType}
+            onChange={(e) =>
+              updateTicket({
+                classType: e.target.value,
+              })
+            }
+            className="w-full rounded-xl border border-orange-300 bg-white p-3 outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200"
+          >
+            <option value="Economy">Economy</option>
+            <option value="Business">Business</option>
+          </select>
+        </div>
       </div>
 
-      {/* Navigation */}
-      <div className="flex justify-between p-5">
-
+      <div className="mt-8 flex items-center justify-between gap-4">
         <button
           type="button"
           onClick={prevStep}
-          className="px-4 py-2 text-red-400 hover:text-red-500 transition-transform hover:scale-110 flex items-center gap-2"
+          className="flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-3 font-semibold text-gray-600 transition hover:bg-gray-50"
         >
-          <ArrowLeft size={30} />
+          <ArrowLeft size={19} />
           Back
         </button>
 
         <button
           type="button"
+          disabled={!canContinue}
           onClick={nextStep}
-          className="px-4 py-2 text-green-400 hover:text-green-500 transition-transform hover:scale-110 flex items-center gap-2"
+          className="flex items-center gap-2 rounded-xl bg-orange-500 px-5 py-3 font-semibold text-white shadow-lg transition hover:bg-orange-600 disabled:cursor-not-allowed disabled:bg-gray-300"
         >
-          Next
-          <ArrowRight size={30} />
+          Review
+          <ArrowRight size={19} />
         </button>
-
       </div>
-
     </div>
   )
 }

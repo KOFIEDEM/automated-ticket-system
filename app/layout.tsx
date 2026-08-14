@@ -3,6 +3,7 @@ import { TicketProvider } from '@/context/TicketContext'
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
 
+
 const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 
@@ -14,9 +15,11 @@ export default function RootLayout({
   return (
     <html className={cn("font-sans overflow-x-hidden", geist.variable)}>
       <body>
+        
         <TicketProvider>
           {children}
         </TicketProvider>
+        
       </body>
     </html>
   )

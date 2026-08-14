@@ -7,7 +7,7 @@ export default function Stepper({ step }: Props) {
   const steps = [
     "Trip Details",
     "Passenger Info",
-    "Seat Selection",
+    // "Seat Selection",
     "Summary"
   ]
 
